@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
+	"github.com/MarcusXavierr/simple-proxy/pkg/proxy"
+	"github.com/MarcusXavierr/simple-proxy/pkg/tcp"
 	"net"
 	"path/filepath"
-	"proxygo/pkg/proxy"
-	"proxygo/pkg/tcp"
 	"time"
 
 	"go.uber.org/zap"

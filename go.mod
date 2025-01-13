@@ -1,4 +1,4 @@
-module proxygo
+module github.com/MarcusXavierr/simple-proxy
 
 go 1.21.6
 

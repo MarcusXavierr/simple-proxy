@@ -3,9 +3,9 @@ package proxy
 import (
 	"bufio"
 	"fmt"
+	"github.com/MarcusXavierr/simple-proxy/pkg/tcp"
 	"net"
 	"net/http"
-	"proxygo/pkg/tcp"
 	"regexp"
 
 	"github.com/pkg/errors"
