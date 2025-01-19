@@ -19,6 +19,22 @@ type Proxy struct {
 	serverConn   net.Conn
 }
 
+// NewProxy creates a new Proxy instance from an incoming client connection.
+// It reads an HTTP request from the client connection and initializes a Proxy struct
+// with the necessary connection and request details.
+//
+// Parameters:
+//   - clientConn: A network connection representing the client's connection
+//
+// Returns:
+//   - A configured Proxy instance ready for request processing
+//   - An error if the HTTP request cannot be parsed from the client connection
+//
+// Example:
+//   proxy, err := NewProxy(clientConnection)
+//   if err != nil {
+//       // Handle error
+//   }
 func NewProxy(clientConn net.Conn) (*Proxy, error) {
 	clientReader := bufio.NewReader(clientConn)
 	req, err := http.ReadRequest(clientReader)
@@ -86,6 +102,7 @@ func (p *Proxy) connectToServer() error {
 	return nil
 }
 
+// Returns true if the host includes a valid port, false otherwise.
 func hasPort(host string) bool {
 	_, port, err := net.SplitHostPort(host)
 	return err == nil && port != ""

@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+// TestStreamRequest tests the StreamRequest method of the Proxy struct by simulating an HTTP request through an in-memory connection. It verifies the proxy's ability to stream a request and receive a valid HTTP response from a mock server. The test covers successful request streaming, response reading, and validates the response status code and body content.
 func TestStreamRequest(t *testing.T) {
 	// Create a pair of in-memory connections
 	clientConn, clientEnd := net.Pipe()
