@@ -64,8 +64,7 @@ func (p *Proxy) ValidateImpementedMethods() error {
 
 func (p *Proxy) connectToServer() error {
 	host := p.ClientReq.Host
-	hasPortSuffix, _ := regexp.MatchString("^[a-zA-Z0-9]+\\.[a-zA-Z0-9]+:[0-9]+$", host)
-	if !hasPortSuffix {
+	if !hasPort(host) {
 		host += ":80"
 	}
 
@@ -76,6 +75,11 @@ func (p *Proxy) connectToServer() error {
 
 	p.serverConn = proxyfd
 	return nil
+}
+
+func hasPort(host string) bool {
+	_, port, err := net.SplitHostPort(host)
+	return err == nil && port != ""
 }
 
 func (p *Proxy) mountRequestHeader() string {
