@@ -26,7 +26,10 @@ func TestStreamRequest(t *testing.T) {
 			t.Errorf("Failed to accept connection: %v", err)
 			return
 		}
-		serverConn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nHello world"))
+		if _, err := serverConn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nHello world")); err != nil {
+			t.Errorf("Failed to write response: %v", err)
+			return
+		}
 		serverConn.Close()
 	}()
 
