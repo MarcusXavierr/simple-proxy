@@ -48,7 +48,9 @@ func TestStreamRequest(t *testing.T) {
 	port := host[strings.IndexByte(host, ':')+1:]
 
 	request := "GET http://localhost:" + port + "/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
-	clientConn.Write([]byte(request))
+	if _, err := clientConn.Write([]byte(request)); err != nil {
+		t.Fatalf("Failed to write request: %v", err)
+	}
 	// clientConn.Close()
 
 	proxy := <-ch
