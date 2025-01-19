@@ -3,23 +3,23 @@ package proxy
 import (
 	"bufio"
 	"fmt"
-	"github.com/MarcusXavierr/simple-proxy/pkg/tcp"
 	"net"
 	"net/http"
-	"regexp"
+
+	"github.com/MarcusXavierr/simple-proxy/pkg/tcp"
 
 	"github.com/pkg/errors"
 )
 
 type Proxy struct {
 	ClientReq    *http.Request
-	clientConn   *net.TCPConn
-	clientWriter *bufio.Writer
-	clientReader *bufio.Reader
-	serverConn   *net.TCPConn
+	clientConn   net.Conn
+	ClientWriter *bufio.Writer
+	ClientReader *bufio.Reader
+	serverConn   net.Conn
 }
 
-func NewProxy(clientConn *net.TCPConn) (*Proxy, error) {
+func NewProxy(clientConn net.Conn) (*Proxy, error) {
 	clientReader := bufio.NewReader(clientConn)
 	req, err := http.ReadRequest(clientReader)
 
@@ -30,8 +30,8 @@ func NewProxy(clientConn *net.TCPConn) (*Proxy, error) {
 	return &Proxy{
 		clientConn:   clientConn,
 		ClientReq:    req,
-		clientWriter: bufio.NewWriter(clientConn),
-		clientReader: clientReader,
+		ClientWriter: bufio.NewWriter(clientConn),
+		ClientReader: clientReader,
 	}, nil
 }
 
@@ -47,8 +47,17 @@ func (p *Proxy) StreamRequest() error {
 	}
 
 	proxyReader := bufio.NewReader(p.serverConn)
-	if _, err := p.clientWriter.ReadFrom(proxyReader); err != nil {
-		return errors.Wrap(err, "Streaming response from server to client")
+
+	// TODO: handle STREAMS and be able to read this on your unit test
+	buffer := make([]byte, 1024)
+	n, err := proxyReader.Read(buffer)
+	if n > 0 {
+		if _, writeErr := p.clientConn.Write(buffer[:n]); writeErr != nil {
+			return errors.Wrap(writeErr, "Writing to client connection")
+		}
+	}
+	if err != nil {
+		return errors.Wrap(err, "Reading from server connection")
 	}
 
 	return nil
@@ -64,8 +73,7 @@ func (p *Proxy) ValidateImpementedMethods() error {
 
 func (p *Proxy) connectToServer() error {
 	host := p.ClientReq.Host
-	hasPortSuffix, _ := regexp.MatchString("^[a-zA-Z0-9]+\\.[a-zA-Z0-9]+:[0-9]+$", host)
-	if !hasPortSuffix {
+	if !hasPort(host) {
 		host += ":80"
 	}
 
@@ -76,6 +84,11 @@ func (p *Proxy) connectToServer() error {
 
 	p.serverConn = proxyfd
 	return nil
+}
+
+func hasPort(host string) bool {
+	_, port, err := net.SplitHostPort(host)
+	return err == nil && port != ""
 }
 
 func (p *Proxy) mountRequestHeader() string {
